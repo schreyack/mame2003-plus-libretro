@@ -25,6 +25,7 @@
 #include "inptport.h"
 #include "fileio.h"
 #include "controls.h"
+#include "memory.h"
 #include "usrintrf.h"
 
 
@@ -334,6 +335,23 @@ bool retro_load_game(const struct retro_game_info *game)
 
   if(!run_game(driverIndex))
     return true;
+
+  /* Expose CPU 0's full address space so RetroArch's READ_CORE_RAM works */
+  {
+    static struct retro_memory_descriptor mem_desc;
+    static struct retro_memory_map mem_map;
+    void *ram = memory_find_base(0, 0);
+    if (ram)
+    {
+      memset(&mem_desc, 0, sizeof(mem_desc));
+      mem_desc.start  = 0;
+      mem_desc.len    = 0x10000;
+      mem_desc.ptr    = ram;
+      mem_map.descriptors     = &mem_desc;
+      mem_map.num_descriptors = 1;
+      environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &mem_map);
+    }
+  }
 
   return false;
 }
@@ -649,8 +667,19 @@ void osd_stop_audio_stream(void)
 ******************************************************************************/
 
 unsigned retro_get_region (void) {return RETRO_REGION_NTSC;}
-void *retro_get_memory_data(unsigned type) {return 0;}
-size_t retro_get_memory_size(unsigned type) {return 0;}
+void *retro_get_memory_data(unsigned type)
+{
+  if (type == RETRO_MEMORY_SYSTEM_RAM)
+    return memory_find_base(0, 0);
+  return 0;
+}
+
+size_t retro_get_memory_size(unsigned type)
+{
+  if (type == RETRO_MEMORY_SYSTEM_RAM)
+    return 0x10000;
+  return 0;
+}
 bool retro_load_game_special(unsigned game_type, const struct retro_game_info *info, size_t num_info){return false;}
 void retro_cheat_reset(void){}
 void retro_cheat_set(unsigned unused, bool unused1, const char* unused2){}
