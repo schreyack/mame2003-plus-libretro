@@ -895,6 +895,8 @@ else
 endif
 else
 	LD = $(CC)
+	# See src/sound/namco_sound_enable_patch.c for rationale.
+	LDFLAGS += -Wl,--wrap=pengo_sound_enable_w
 endif
 
 define NEWLINE
