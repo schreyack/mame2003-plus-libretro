@@ -17,11 +17,14 @@
  */
 
 #include "driver.h"
+#include <stdio.h>
 
 extern WRITE_HANDLER( __real_pengo_sound_enable_w );
 
 WRITE_HANDLER( __wrap_pengo_sound_enable_w )
 {
+	fprintf(stderr, "[namco_patch] sound_enable_w offset=%u data=%u\n",
+		(unsigned)offset, (unsigned)data);
 	if (data != 0)
 		__real_pengo_sound_enable_w(offset, data);
 }
