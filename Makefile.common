@@ -2323,6 +2323,7 @@ SOUND=$(strip $(findstring NAMCO_15XX@,$(SOUNDS)))
 ifneq ($(SOUND),)
 SOUNDDEFS += -DHAS_NAMCO_15XX=1
 SOURCES_C += $(CORE_DIR)/sound/namco.c
+SOURCES_C += $(CORE_DIR)/sound/namco_sound_enable_patch.c
 else
 SOUNDDEFS += -DHAS_NAMCO_15XX=0
 endif
